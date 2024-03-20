@@ -1,0 +1,185 @@
+{$CLEO} //PC
+//{$CLEO .csa} //Android
+0000:
+
+const
+float_x = 1@
+float_y = 2@
+float_z = 3@
+float_x2 = 4@
+float_y2 = 5@
+float_z2 = 6@
+float_angle = 7@
+model_var = 8@
+homeless = 9@
+action = 10@
+anims = 11@
+piss = 12@
+particle = 13@
+distance_temp = 14@
+interior_id = 15@
+end
+
+while true
+    wait 0
+    077E: get_active_interior_to interior_id
+    if and
+        $ONMISSION == 0 //PC, Android
+        interior_id == 0
+        // ... //PC DE
+        //$42 == 0 // active interior (Android)
+        Player.Defined(0)
+    then
+        Wait 2000
+        Actor.StorePos($PLAYER_ACTOR, float_x, float_y, float_z)
+        02C0: store_to float_x2 float_y2 float_z2 ped_path_coords_closest_to float_x float_y float_z
+        0509: distance_temp = distance_between_XY float_x2 float_y2 and_XY float_x float_y
+        if
+            not distance_temp > 10.0
+        then
+            0209: float_angle = random_int_in_ranges 0 361
+            Model.Load(2995)
+            038B: load_requested_models
+            model_var = Object.Create(2995, float_x2, float_y2, float_z2)
+            0382: set_object model_var collision_detection 1
+            0750: set_object model_var visibility 0
+            Model.Destroy(2995)
+
+            repeat
+            wait 0
+            until 82CC:  not object model_var bounding_sphere_visible
+
+            Object.Destroy(model_var)
+            0209: model_var = random_int_in_ranges 134 137
+            Model.Load(model_var)
+            038B: load_requested_models
+            homeless = Actor.Create(CivMale, model_var, float_x2, float_y2, float_z2)
+            Actor.Angle(homeless) = float_angle
+            0209: action = random_int_in_ranges 1 3
+            Model.Destroy(model_var)
+
+            if
+                action == 1
+            then
+                repeat
+                wait 0
+                04ED: load_animation "PAULNMAC"
+                until 04EE:  animation "PAULNMAC" loaded
+
+                0615: define_AS_pack_begin anims
+                0605: actor -1 perform_animation "PISS_IN" IFP "PAULNMAC" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                0605: actor -1 perform_animation "PISS_LOOP" IFP "PAULNMAC" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                0605: actor -1 perform_animation "PISS_OUT" IFP "PAULNMAC" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                05DE: AS_actor -1 walk_around_ped_path
+                0616: define_AS_pack_end anims
+                0618: assign_actor homeless to_AS_pack anims
+                061B: remove_references_to_AS_pack anims
+                piss = 1
+
+                while piss > 0
+                    wait 0
+                    if
+                        not Actor.Dead(homeless)
+                    then
+                        if and
+                            piss == 1
+                            Actor.Animation(homeless) == "PISS_LOOP"
+                        then
+                            066A: particle = attach_particle "PETROLCAN" to_actor homeless with_offset 0.0 0.58 -0.08 rotation 0.0 0.01 0.0 type 1
+                            064C: make_particle particle visible
+                            piss = 2
+                        else
+                            if
+                                not Actor.Dead(homeless)
+                            then
+                                if and
+                                    piss == 2
+                                    Actor.Animation(homeless) == "PISS_OUT"
+                                then
+                                    064E: stop_particle particle
+                                    0976: destroy_particle particle
+                                    piss = 3
+                                else
+                                    if
+                                        not Actor.Dead(homeless)
+                                    then
+                                        if and
+                                            piss == 3
+                                            not Actor.Animation(homeless) == "PISS_OUT"
+                                        then
+                                            064E: stop_particle particle
+                                            wait 1000
+                                            0976: destroy_particle particle
+                                            wait 1000
+                                            piss = 0
+                                            Actor.RemoveReferences(homeless)
+                                        else
+                                            if
+                                                Actor.Dead(homeless)
+                                            then
+                                                064E: stop_particle particle
+                                                0650: destroy_particle particle
+                                                Actor.RemoveReferences(homeless)
+                                                piss = 0
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+                wait 120000
+            else
+                if
+                    action == 2
+                then
+                    Object.Init(model_var, 1509, 0.0, 0.0, 0.0)
+                    070A: AS_actor homeless attach_to_object model_var offset 0.05 0.06 0.05 on_bone 5 16 perform_animation "NULL" IFP_file "NULL" time -1
+                    Actor.SetWalkStyle(homeless, "DRUNKMAN")
+                    05DE: AS_actor homeless walk_around_ped_path
+                    wait 120000
+                    Actor.RemoveReferences(homeless)
+                else
+                    if
+                        action == 3
+                    then
+                        repeat
+                        wait 0
+                        04ED: load_animation "SUNBATHE"
+                        until 04EE: animation "SUNBATHE" loaded
+
+                        0615: define_AS_pack_begin anims
+                        0605: actor -1 perform_animation "PARKSIT_M_IN" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        0605: actor -1 perform_animation "PARKSIT_M_IDLEB" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        0605: actor -1 perform_animation "PARKSIT_M_IDLEA" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        0605: actor -1 perform_animation "PARKSIT_M_IDLEC" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        0605: actor -1 perform_animation "PARKSIT_M_IDLEB" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        0605: actor -1 perform_animation "PARKSIT_M_IDLEC" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        0605: actor -1 perform_animation "PARKSIT_M_OUT" IFP "SUNBATHE" framedelta 4.0 loop 0 lockX 0 lockY 0 lockF 0 time -1
+                        05DE: AS_actor -1 walk_around_ped_path
+                        0616: define_AS_pack_end anims
+                        0618: assign_actor homeless to_AS_pack anims
+                        061B: remove_references_to_AS_pack anims
+
+                        while piss > 0
+                            wait 0
+                            if
+                                not Actor.Dead(homeless)
+                            then
+                                if
+                                    Actor.Animation(homeless) == "PARKSIT_M_OUT"
+                                then
+                                    wait 2000
+                                    Actor.RemoveReferences(homeless)
+                                    piss = 0
+                                end
+                            end
+                        end
+                        wait 120000
+                    end
+                end
+            end
+        end
+    end
+end
